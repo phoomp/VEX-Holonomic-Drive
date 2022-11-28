@@ -7,7 +7,7 @@ using code = vision::code;
 // A global instance of brain used for printing to the V5 Brain screen ( + other information)
 brain Brain;
 
-// CONFIGURATIONS: IF YOU DON'T KNOW WHAT YOU'RE DOING, ONLY MODIFY THE FOLLOWING LINES
+// CONFIGURATIONS: ONLY MODIFY THE FOLLOWING LINES UNLESS ADDING FEATURES/FIXING BUGS
 unsigned int robotWidthMM = 0;
 unsigned int wheelDiameterMM = 0;
 
