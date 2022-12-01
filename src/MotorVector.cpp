@@ -42,6 +42,10 @@ void MotorVector::solve() {
     magnitude = (int)round(((double)xySum / (double)controllerAxisSum) * 100);
     magnitude = std::min(100, magnitude);
   }
+
+  // Make the front actually "front"
+  angleFromOrigin += 45;
+  if (angleFromOrigin >= 360) angleFromOrigin -= 360;
 }
 
 void MotorVector::calculateMotorPower() {
@@ -95,11 +99,14 @@ void MotorVector::calculateMotorPower() {
   m4Power = yComponent;
 
   // Now we scale it back up
-  double maximum = std::max(xComponent, yComponent);
+  // double maximum = std::max(xComponent, yComponent);
+  double max1 = std::max(m1Power, m2Power);
+  double max2 = std::max(m3Power, m4Power);
+  double maximum = std::max(max1, max2);
   double ratio = magnitude / maximum;
 
-  m1Power *= round(ratio) * pow(-1, xNeg);
-  m2Power *= round(ratio) * pow(-1, yNeg);
-  m3Power *= round(ratio) * pow(-1, xNeg);
-  m4Power *= round(ratio) * pow(-1, yNeg);
+  m1Power *= round(ratio) * pow(-1, xNeg) + (double)rotation;
+  m2Power *= round(ratio) * pow(-1, yNeg) - (double)rotation;
+  m3Power *= round(ratio) * pow(-1, xNeg) - (double)rotation;
+  m4Power *= round(ratio) * pow(-1, yNeg) + (double)rotation;
 }

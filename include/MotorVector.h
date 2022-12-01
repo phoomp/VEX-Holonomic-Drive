@@ -8,6 +8,7 @@ class MotorVector {
 
     int inputX;
     int inputY;
+    int rotation;
     
     int magnitude;
     int angleFromOrigin;

@@ -27,8 +27,8 @@ int controllerAxisSum = 170;
 
 // Motors
 motor m1 = motor(m1MotorPort, motorRatio, false);
-motor m2 = motor(m2MotorPort, motorRatio, false);
-motor m3 = motor(m3MotorPort, motorRatio, false);
+motor m2 = motor(m2MotorPort, motorRatio, true);
+motor m3 = motor(m3MotorPort, motorRatio, true);
 motor m4 = motor(m4MotorPort, motorRatio, false);
 
 

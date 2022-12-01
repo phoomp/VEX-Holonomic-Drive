@@ -141,13 +141,42 @@ int processControllerInput() {
   while (true) {
     vec.inputX = PrimaryController.Axis4.position();
     vec.inputY = PrimaryController.Axis3.position();
+    vec.rotation = PrimaryController.Axis1.position();
     vec.solve();
     vec.calculateMotorPower();
 
-    m1.spin(forward, vec.m1Power, percent);
-    m2.spin(forward, vec.m2Power, percent);
-    m3.spin(forward, vec.m3Power, percent);
-    m4.spin(forward, vec.m4Power, percent);
+    if (vec.m1Power != 0) {
+      m1.spin(forward, vec.m1Power, percent);
+    }
+    else {
+      
+      m1.stop(hold);
+    }
+    
+    if (vec.m2Power != 0) {
+      m2.spin(forward, vec.m2Power, percent);
+    }
+    else {
+      m2.stop(hold);
+    }
+
+    if (vec.m3Power != 0) {
+      m3.spin(forward, vec.m3Power, percent);
+    }
+    else {
+      m3.stop(hold);
+    }
+
+    if (vec.m4Power != 0) {
+      m4.spin(forward, vec.m4Power, percent);
+    }
+    else {
+      m4.stop(hold);
+    }
+    // m1.spin(forward, vec.m1Power, percent);
+    // m2.spin(forward, vec.m2Power, percent);
+    // m3.spin(forward, vec.m3Power, percent);
+    // m4.spin(forward, vec.m4Power, percent);
 
     wait(20, msec);
   }
