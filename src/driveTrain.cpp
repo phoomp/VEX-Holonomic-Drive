@@ -13,7 +13,7 @@ extern int controllerJoystickMinActivation;
 extern int controllerJoystickMaxBeforeFullPower;
 
 // RECORDING FLAG
-const bool recordingEnabledForThisBuild = false;
+const bool recordingEnabledForThisBuild = true;
 
 // For recording
 task recordTask;
@@ -27,29 +27,30 @@ bool recordingAvail = false;
 double recordingSampleInterval = 10;
 
 bool replaying = false;
+bool replayinReverse = false;
 
 std::vector<double> m1Buf, m2Buf, m3Buf, m4Buf;
 
-int record() {
-  displayInput.suspend();
-  m1Buf.clear();
-  m2Buf.clear();
-  m3Buf.clear();
-  m4Buf.clear();
+// int record() {
+//   displayInput.suspend();
+//   m1Buf.clear();
+//   m2Buf.clear();
+//   m3Buf.clear();
+//   m4Buf.clear();
 
-  while (true) {
-    m1Buf.push_back(m1.velocity(rpm));
-    m2Buf.push_back(m2.velocity(rpm));
-    m3Buf.push_back(m3.velocity(rpm));
-    m4Buf.push_back(m4.velocity(rpm));
+//   while (true) {
+//     m1Buf.push_back(m1.velocity(rpm));
+//     m2Buf.push_back(m2.velocity(rpm));
+//     m3Buf.push_back(m3.velocity(rpm));
+//     m4Buf.push_back(m4.velocity(rpm));
 
-    wait(recordingSampleInterval, msec);
-  }
-  displayInput.resume();
-  return 0;
-}
+//     wait(recordingSampleInterval, msec);
+//   }
+//   displayInput.resume();
+//   return 0;
+// }
 
-int replay() {
+int replayReverse() {
   processInput.suspend();
   int m1s, m2s, m3s, m4s;
   m1s = m1Buf.size();
@@ -62,9 +63,9 @@ int replay() {
   if (m1s == m2s && m3s == m4s) {
     while (m1Buf.size()) {
       m1.spin(reverse, m1Buf.back(), rpm);
-      m2.spin(reverse, m1Buf.back(), rpm);
-      m3.spin(reverse, m1Buf.back(), rpm);
-      m4.spin(reverse, m1Buf.back(), rpm);
+      m2.spin(reverse, m2Buf.back(), rpm);
+      m3.spin(reverse, m3Buf.back(), rpm);
+      m4.spin(reverse, m4Buf.back(), rpm);
 
       // PrimaryController.Screen.clearLine();
       // PrimaryController.Screen.setCursor(1, 1);
@@ -93,17 +94,61 @@ int replay() {
   return 0;
 }
 
+int replayForward() {
+  processInput.suspend();
+  int m1s, m2s, m3s, m4s;
+  m1s = m1Buf.size();
+  m2s = m2Buf.size();
+  m3s = m3Buf.size();
+  m4s = m4Buf.size();
+
+  printf("Test debug");
+
+  if (m1s == m2s && m3s == m4s) {
+    while (m1Buf.size()) {
+      m1.spin(forward, m1Buf.front(), rpm);
+      m2.spin(forward, m2Buf.front(), rpm);
+      m3.spin(forward, m3Buf.front(), rpm);
+      m4.spin(forward, m4Buf.front(), rpm);
+
+      // PrimaryController.Screen.clearLine();
+      // PrimaryController.Screen.setCursor(1, 1);
+      // PrimaryController.Screen.print("%.0f, %.0f, %.0f, %.0f", m1Buf.back(), m2Buf.back(), m3Buf.back(), m4Buf.back());
+
+      m1Buf.erase(m1Buf.begin());
+      m2Buf.erase(m2Buf.begin());
+      m3Buf.erase(m3Buf.begin());
+      m4Buf.erase(m4Buf.begin());
+      
+      wait(recordingSampleInterval, msec);
+    }
+  }
+  else {
+    PrimaryController.Screen.clearLine();
+    PrimaryController.Screen.setCursor(1, 1);
+    PrimaryController.Screen.print("%d, %d, %d, %d", m1Buf.size(), m2Buf.size(), m3Buf.size(), m4Buf.size());
+  }
+
+  replaying = false;
+  PrimaryController.Screen.clearLine();
+  PrimaryController.Screen.setCursor(1, 1);
+  PrimaryController.Screen.print("Ready to Record");
+
+  processInput.resume();
+  return 0;
+}
+
 void recordHandling() {
   PrimaryController.Screen.clearLine();
   PrimaryController.Screen.setCursor(1, 1);
   if (!recording) {
     recording = true;
     PrimaryController.Screen.print("Recording");
-    recordTask = task(record);
+    // recordTask = task(record);
   }
   else {
-    recordTask.suspend();
-    displayInput.resume();
+    // recordTask.suspend();
+    // displayInput.resume();
     recording = false;
     PrimaryController.Screen.print("Ready to replay");
     recordingAvail = true;
@@ -116,7 +161,11 @@ void replayHandling() {
   if (recordingAvail) {
     replaying = true;
     PrimaryController.Screen.print("Replaying");
-    replayTask = task(replay);
+    if (replayinReverse) {
+      task replay(replayReverse);
+    } else {
+      task replay(replayForward);
+    }
   }
   else {
     if (replaying == true) {
@@ -139,46 +188,65 @@ int processControllerInput() {
   }
 
   while (true) {
+    if (recording) {
+      m1Buf.push_back(m1.velocity(rpm));
+      m2Buf.push_back(m2.velocity(rpm));
+      m3Buf.push_back(m3.velocity(rpm));
+      m4Buf.push_back(m4.velocity(rpm));
+    }
+
     vec.inputX = PrimaryController.Axis4.position();
     vec.inputY = PrimaryController.Axis3.position();
     vec.rotation = PrimaryController.Axis1.position();
     vec.solve();
     vec.calculateMotorPower();
 
+    if (recording) {
+      m1.setBrake(coast);
+      m2.setBrake(coast);
+      m3.setBrake(coast);
+      m4.setBrake(coast);
+    }
+    else {
+      m4.setBrake(brake);
+      m1.setBrake(brake);
+      m2.setBrake(brake);
+      m3.setBrake(brake);
+    }
+
     if (vec.m1Power != 0) {
       m1.spin(forward, vec.m1Power, percent);
     }
     else {
-      
-      m1.stop(hold);
+      m1.stop();
     }
     
     if (vec.m2Power != 0) {
       m2.spin(forward, vec.m2Power, percent);
     }
     else {
-      m2.stop(hold);
+      m2.stop();
     }
 
     if (vec.m3Power != 0) {
       m3.spin(forward, vec.m3Power, percent);
     }
     else {
-      m3.stop(hold);
+      m3.stop();
     }
 
     if (vec.m4Power != 0) {
       m4.spin(forward, vec.m4Power, percent);
     }
     else {
-      m4.stop(hold);
+      m4.stop();
     }
     // m1.spin(forward, vec.m1Power, percent);
     // m2.spin(forward, vec.m2Power, percent);
     // m3.spin(forward, vec.m3Power, percent);
     // m4.spin(forward, vec.m4Power, percent);
 
-    wait(20, msec);
+    wait(recordingSampleInterval, msec);
   }
   return 0;
 }
