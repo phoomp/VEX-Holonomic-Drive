@@ -50,6 +50,71 @@ void pre_auton(void) {
 int move() {
   m1.spin(forward, 100, percent);
   m1.spin(forward, 100, rpm);
+  m2.spin(forward, 100, percent);
+  m2.spin(forward, 100, rpm);
+  m3.spin(forward, 100, percent);
+  m3.spin(forward, 100, rpm);
+  m4.spin(forward, 100, percent);
+  m4.spin(forward, 100, rpm);
+
+  wait (3000, msec);
+
+
+  m1.spin(reverse, 100, percent);
+  m1.spin(reverse, 100, rpm);
+  m2.spin(reverse, 100, percent);
+  m2.spin(reverse, 100, rpm);
+  m3.spin(reverse, 100, percent);
+  m3.spin(reverse, 100, rpm);
+  m4.spin(reverse, 100, percent);
+  m4.spin(reverse, 100, rpm);
+
+  wait(300, msec);
+
+  m1.spin(forward, 100, percent);
+  m1.spin(forward, 100, rpm);
+  m2.spin(reverse, 100, percent);
+  m2.spin(reverse, 100, rpm);
+  m3.spin(reverse, 100, percent);
+  m3.spin(reverse, 100, rpm);
+  m4.spin(forward, 100, percent);
+  m4.spin(forward, 100, rpm);
+
+  
+  // m1.spin(forward, 100, percent);
+  // m1.spin(forward, 100, rpm);
+  // m2.spin(reverse, 100, percent);
+  // m2.spin(reverse, 100, rpm);
+  // m3.spin(reverse, 100, percent);
+  // m3.spin(reverse, 100, rpm);
+  // m4.spin(forward, 100, percent);
+  // m4.spin(forward, 100, rpm);
+  
+  // wait(1000, msec);
+
+  // m1.spinFor(forward, 500, msec, 100, percent);
+
+  // m1.spin(forward, 100, percent);
+  // m1.spin(forward, 100, rpm);
+  // m2.spin(forward, 100, percent);
+  // m2.spin(forward, 100, rpm);
+  // m3.spin(forward, 100, percent);
+  // m3.spin(forward, 100, rpm);
+  // m4.spin(forward, 100, percent);
+  // m4.spin(forward, 100, rpm);
+
+  // wait (5000, msec);
+
+
+  // m1.spin(reverse, 0, percent);
+  // m1.spin(reverse, 0, rpm);
+  // m2.spin(reverse, 0, percent);
+  // m2.spin(reverse, 0, rpm);
+  // m3.spin(reverse, 0, percent);
+  // m3.spin(reverse, 0, rpm);
+  // m4.spin(reverse, 0, percent);
+  // m4.spin(reverse, 0, rpm);
+
   
   return 0;
 }
